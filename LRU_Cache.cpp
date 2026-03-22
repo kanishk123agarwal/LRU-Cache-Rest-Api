@@ -20,6 +20,7 @@ class Node{
 class LRUCache{
     private:
     int capacity;
+    shared_mutex mtx;
 
     unordered_map<int,Node*> cache;
     Node* head;
@@ -56,6 +57,9 @@ class LRUCache{
     }
 
     int get(int key){
+
+        unique_lock<shared_mutex> lock(mtx);
+
         // Key is not found
         if(cache.find(key)==cache.end()){
             return -1;
@@ -69,6 +73,9 @@ class LRUCache{
     }
 
     void put(int key,int value){
+
+        unique_lock<shared_mutex> lock(mtx);
+
         // Case 1: key already exists
         if(cache.find(key)!=cache.end()){
             Node* existingNode=cache[key];
@@ -104,4 +111,43 @@ class LRUCache{
         // insert in hashmap
         cache[key]=newNode;
     }
+
+    // Add Destruction 
+    ~LRUCache(){
+        Node* curr=head;
+        while(curr){
+            Node* nextNode=curr->next;
+            delete curr;
+            curr=nextNode;
+        }
+    }
 };
+
+// Thread creation
+void worker(LRUCache& cache,int start){
+    for(int i=0;i<100000;i++){
+        cache.put(start+i,i);
+    }
+}
+
+void reader(LRUCache& cache){
+    for(int i=0;i<100000;i++){
+        cache.get(i % 100);
+    }
+}
+
+int main(){
+    LRUCache cache(100);
+    thread t1(worker,ref(cache),0);
+    thread t2(worker,ref(cache),100000);
+    t1.join();
+    t2.join();
+
+    // for read
+    thread t3(reader,ref(cache));
+    thread t4(reader,ref(cache));
+    t3.join();
+    t4.join();
+    
+    cout<<"Finished\n";
+}
