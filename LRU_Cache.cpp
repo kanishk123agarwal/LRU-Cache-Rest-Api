@@ -26,6 +26,11 @@ class LRUCache{
     Node* head;
     Node* tail;
 
+    // Metrices
+    long long hits;
+    long long misses;
+    long long evictions;
+
     public:
     LRUCache(int capacity){
         this->capacity=capacity;
@@ -34,6 +39,10 @@ class LRUCache{
         tail=new Node(-1,-1);
         head->next=tail;
         tail->prev=head;
+
+        hits=0;
+        misses=0;
+        evictions=0;
     }
 
     void addToFront(Node* node){
@@ -62,6 +71,7 @@ class LRUCache{
 
         // Key is not found
         if(cache.find(key)==cache.end()){
+            misses++;
             return -1;
         }
 
@@ -69,6 +79,7 @@ class LRUCache{
         Node* node=cache[key];
 
         moveToFront(node);
+        hits++;
         return node->value;
     }
 
@@ -98,7 +109,7 @@ class LRUCache{
 
             // remove from DLL
             removeNode(lru);
-
+            evictions++;
             delete lru;
         }
 
@@ -112,11 +123,23 @@ class LRUCache{
         cache[key]=newNode;
     }
 
-    void displayStats(){
-        cout<<"{";
-        cout<<"\"capacity\": "<<capacity<<",";
-        cout<<"\"current size\": "<<cache.size();
-        cout<<"}"<<endl;
+    string getStats(){
+        shared_lock<shared_mutex> lock(mtx);
+        long long total = hits + misses;
+        double hitRate = 0.0;
+        if(total > 0){
+            hitRate = (double)hits / total * 100.0;
+        }
+
+        stringstream ss;
+        ss << "{";
+        ss << "\"hits\": " << hits << ",";
+        ss << "\"misses\": " << misses << ",";
+        ss << "\"evictions\": " << evictions << ",";
+        ss << "\"hit_rate\": " << fixed << setprecision(1) << hitRate;
+        ss << "}";
+
+        return ss.str();
     }
 
     // Add Destruction 
@@ -179,7 +202,7 @@ int main(int argc,char* argv[]){
                 cout<<"Cache Not Initialized"<<endl;
                 continue;
             }
-            cache->displayStats(); 
+            cout<<cache->getStats()<<endl; 
         } 
         else if(command == "exit"){ 
             cout << "Shutting Down" << endl; 

@@ -2,6 +2,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import subprocess
+import json
 
 # ------------------------------------------------
 # Create FastAPI App
@@ -143,7 +144,6 @@ def get_stats():
             detail=response
         )
 
-    return {
-        "stats": response
-    }
+    return json.loads(response)
+    
 
