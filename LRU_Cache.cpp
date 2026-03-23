@@ -112,6 +112,13 @@ class LRUCache{
         cache[key]=newNode;
     }
 
+    void displayStats(){
+        cout<<"{";
+        cout<<"\"capacity\": "<<capacity<<",";
+        cout<<"\"current size\": "<<cache.size();
+        cout<<"}"<<endl;
+    }
+
     // Add Destruction 
     ~LRUCache(){
         Node* curr=head;
@@ -123,31 +130,68 @@ class LRUCache{
     }
 };
 
-// Thread creation
-void worker(LRUCache& cache,int start){
-    for(int i=0;i<100000;i++){
-        cache.put(start+i,i);
-    }
-}
-
-void reader(LRUCache& cache){
-    for(int i=0;i<100000;i++){
-        cache.get(i % 100);
-    }
-}
-
-int main(){
-    LRUCache cache(100);
-    thread t1(worker,ref(cache),0);
-    thread t2(worker,ref(cache),100000);
-    t1.join();
-    t2.join();
-
-    // for read
-    thread t3(reader,ref(cache));
-    thread t4(reader,ref(cache));
-    t3.join();
-    t4.join();
+int main(int argc,char* argv[]){
+    LRUCache* cache=nullptr;
+    string command; 
     
-    cout<<"Finished\n";
+    while(cin >> command){ 
+        // create cache
+        if(command=="create"){
+            int capacity;
+            cin>>capacity;
+
+            // delete old cache if exist 
+            if(cache!=nullptr){
+                delete cache;
+            }
+
+            cache=new LRUCache(capacity);
+            cout<<"Cache Created Successfully"<<endl;
+        }
+
+        else if(command == "put"){ 
+            if(cache==nullptr){
+                cout<<"Cache Not Initialized"<<endl;
+                continue;
+            }
+            int key,value; 
+            cin >> key >> value; 
+            cache->put(key,value); 
+            cout << "Inserted Successfully" << endl; 
+        } 
+        else if(command == "get"){ 
+            if(cache==nullptr){
+                cout<<"Cache Not Initialized"<<endl;
+                continue;
+            }
+            int key; 
+            cin >> key; 
+            int result = cache->get(key); 
+            if(result == -1){ 
+                cout << "Key Not Found" << endl; 
+            }
+            else{ 
+                cout << result << endl; 
+            } 
+        } 
+        else if(command == "stats"){ 
+            if(cache==nullptr){
+                cout<<"Cache Not Initialized"<<endl;
+                continue;
+            }
+            cache->displayStats(); 
+        } 
+        else if(command == "exit"){ 
+            cout << "Shutting Down" << endl; 
+            break; 
+        } 
+        else{ 
+            cout << "Invalid Command" << endl; 
+        } 
+        cout.flush(); 
+    } 
+    if(cache!=nullptr){
+        delete cache;
+    }
+    return 0;
 }
