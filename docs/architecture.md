@@ -1,0 +1,30 @@
+## Architecture
+
+```text
+┌─────────┐
+│ Client  │
+└────┬────┘
+     │
+     ▼
+┌─────────┐
+│ FastAPI │
+└────┬────┘
+     │
+     ▼
+┌──────────────────┐
+│ Thread-Safe LRU  │
+│      Cache       │
+└────┬────────┬────┘
+     │        │
+     ▼        ▼
+
+┌─────────┐  ┌─────────────┐
+│ HashMap │  │ Doubly      │
+│ key→ptr │  │ Linked List │
+└─────────┘  └─────────────┘
+```
+
+O(1) Lookup
+O(1) Insert
+O(1) Delete
+O(1) Move-To-Front
