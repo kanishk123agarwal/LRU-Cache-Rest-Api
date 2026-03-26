@@ -1,0 +1,4 @@
+workload,time_ms
+read-heavy,19
+write-heavy,30
+mixed,16

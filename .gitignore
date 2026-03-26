@@ -52,5 +52,13 @@ Thumbs.db
 *.tmp
 *.temp
 
-cache 
+# Executables
+cache
+benchmark
+concurrent_test
+workload_benchmark
+functional_test
+
+# Python
 __pycache__/
+*.pyc
