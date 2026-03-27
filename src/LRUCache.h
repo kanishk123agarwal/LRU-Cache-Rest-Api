@@ -43,6 +43,8 @@ public:
 
     size_t getSize();
 
+    vector<pair<int,int>> getCacheState();
+
     ~LRUCache();
 };
 

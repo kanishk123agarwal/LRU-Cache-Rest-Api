@@ -126,6 +126,21 @@ size_t LRUCache::getSize(){
     return cache.size();
 }
 
+vector<pair<int,int>> LRUCache::getCacheState() {
+    shared_lock<shared_mutex> lock(mtx);
+
+    vector<pair<int,int>> state;
+
+    Node* curr = head->next;
+
+    while(curr != tail){
+        state.push_back({curr->key,curr->value});
+        curr = curr->next;
+    }
+
+    return state;
+}
+
 LRUCache::~LRUCache(){
 
     Node* curr=head;

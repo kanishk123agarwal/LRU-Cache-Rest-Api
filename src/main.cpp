@@ -51,6 +51,24 @@ int main(int argc,char* argv[]){
             }
             cout<<cache->getStats()<<endl; 
         } 
+        else if(command == "state"){
+            if(cache == nullptr){
+                cout << "Cache Not Initialized" << endl;
+                continue;
+            }
+            auto state = cache->getCacheState();
+            cout << "[";
+            for(size_t i = 0; i < state.size(); i++){
+                cout << "{";
+                cout << "\"key\":" << state[i].first << ",";
+                cout << "\"value\":" << state[i].second;
+                cout << "}";
+                if(i + 1 < state.size()){
+                    cout << ",";
+                }
+            }
+            cout << "]" << endl;
+        }
         else if(command == "exit"){ 
             cout << "Shutting Down" << endl; 
             break; 

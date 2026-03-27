@@ -146,4 +146,17 @@ def get_stats():
 
     return json.loads(response)
     
+@app.get("/cache-state")
+def cache_state():
 
+    response = send_command("state")
+
+    if response == "Cache Not Initialized":
+        raise HTTPException(
+            status_code=400,
+            detail=response
+        )
+
+    return {
+        "cache": json.loads(response)
+    }
