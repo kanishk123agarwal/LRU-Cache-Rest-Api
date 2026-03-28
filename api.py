@@ -1,6 +1,7 @@
-
+from threading import Lock
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 import json
 
@@ -9,7 +10,15 @@ import json
 # ------------------------------------------------
 
 app = FastAPI()
+command_lock = Lock()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # ------------------------------------------------
 # Start Persistent C++ Cache Process
 # ------------------------------------------------
@@ -39,16 +48,18 @@ class PutRequest(BaseModel):
 
 def send_command(command: str):
 
-    # Send command to C++
-    cache_process.stdin.write(command + "\n")
+    with command_lock:
 
-    # Immediately flush buffer
-    cache_process.stdin.flush()
+        print("SEND:", command)
 
-    # Read response from C++
-    response = cache_process.stdout.readline().strip()
+        cache_process.stdin.write(command + "\n")
+        cache_process.stdin.flush()
 
-    return response
+        response = cache_process.stdout.readline().strip()
+
+        print("RECV:", response)
+
+        return response
 
 # ------------------------------------------------
 # Root Route

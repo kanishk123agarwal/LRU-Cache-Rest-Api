@@ -45,6 +45,8 @@ public:
 
     vector<pair<int,int>> getCacheState();
 
+    int getCapacity();
+
     ~LRUCache();
 };
 

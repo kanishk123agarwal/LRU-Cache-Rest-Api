@@ -110,10 +110,12 @@ string LRUCache::getStats(){
     stringstream ss;
 
     ss<<"{";
-    ss<<"\"hits\": "<<hits<<",";
-    ss<<"\"misses\": "<<misses<<",";
-    ss<<"\"evictions\": "<<evictions<<",";
-    ss<<"\"hit_rate\": "<<fixed<<setprecision(1)<<hitRate;
+    ss<<"\"hits\": "<<hits.load()<<",";
+    ss<<"\"misses\": "<<misses.load()<<",";
+    ss<<"\"evictions\": "<<evictions.load()<<",";
+    ss<<"\"hit_rate\": "<<fixed<<setprecision(1)<<hitRate<<",";
+    ss<<"\"size\":"<<cache.size()<<",";
+    ss<<"\"capacity\":"<<capacity;
     ss<<"}";
 
     return ss.str();
@@ -139,6 +141,13 @@ vector<pair<int,int>> LRUCache::getCacheState() {
     }
 
     return state;
+}
+
+int LRUCache::getCapacity() {
+
+    shared_lock<shared_mutex> lock(mtx);
+
+    return capacity;
 }
 
 LRUCache::~LRUCache(){
