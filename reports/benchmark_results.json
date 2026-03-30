@@ -1,0 +1,14 @@
+[
+    {
+        "operations": 1000,
+        "time": 3
+    },
+    {
+        "operations": 10000,
+        "time": 43
+    },
+    {
+        "operations": 100000,
+        "time": 250
+    }
+]
