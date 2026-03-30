@@ -1,105 +1,162 @@
 import { useState } from "react";
-
-import {putValue,getValue} from "../services/api";
+import { putValue, getValue } from "../services/api";
 
 function CacheForm({ refresh }) {
+  const [putKey, setPutKey] = useState("");
+  const [putVal, setPutVal] = useState("");
 
-    const [putKey, setPutKey] = useState("");
-    const [putVal, setPutVal] = useState("");
+  const [getKeyState, setGetKeyState] =
+    useState("");
 
-    const [getKeyState, setGetKeyState] =
-        useState("");
+  const [message, setMessage] = useState("");
 
-    const [message, setMessage] =
-        useState("");
+  const handlePut = async () => {
+    try {
+      await putValue(
+        Number(putKey),
+        Number(putVal)
+      );
 
-    const handlePut = async () => {
+      setMessage("Inserted Successfully");
 
-        try{
+      setPutKey("");
+      setPutVal("");
 
-            await putValue(
-                Number(putKey),
-                Number(putVal)
-            );
+      refresh();
+    } catch {
+      setMessage("PUT Failed");
+    }
+  };
 
-            setMessage("Inserted");
+  const handleGet = async () => {
+    try {
+      const response = await getValue(
+        Number(getKeyState)
+      );
 
-            refresh();
-        }
-        catch(error){
+      setMessage(
+        `Value = ${response.data.value}`
+      );
 
-            setMessage("PUT Failed");
-        }
-    };
+      setGetKeyState("");
+    } catch {
+      setMessage("Key Not Found");
 
-    const handleGet = async () => {
+      setGetKeyState("");
+    } finally {
+      refresh();
+    }
+  };
 
-        try{
+  return (
+    <div
+      className="
+      grid
+      grid-cols-1
+      md:grid-cols-2
+      gap-6
+      "
+    >
+      <div
+        className="
+        bg-slate-800
+        rounded-xl
+        p-6
+        shadow-lg
+        "
+      >
+        <h2 className="text-xl font-semibold mb-4">
+          PUT Operation
+        </h2>
 
-            const response =
-                await getValue(
-                    Number(getKeyState)
-                );
+        <div className="flex flex-col gap-3">
+          <input
+            placeholder="Key"
+            value={putKey}
+            onChange={(e) =>
+              setPutKey(e.target.value)
+            }
+            className="
+            bg-slate-700
+            rounded-lg
+            p-2
+            "
+          />
 
-            setMessage(
-                `Value = ${response.data.value}`
-            );
+          <input
+            placeholder="Value"
+            value={putVal}
+            onChange={(e) =>
+              setPutVal(e.target.value)
+            }
+            className="
+            bg-slate-700
+            rounded-lg
+            p-2
+            "
+          />
 
-        }
-        catch(error){
-
-            setMessage("Key Not Found");
-        }
-        finally{
-            refresh();
-        }
-    };
-
-    return (
-
-        <div>
-
-            <h2>Cache Operations</h2>
-
-            <input
-                placeholder="Key"
-                value={putKey}
-                onChange={(e)=>
-                    setPutKey(e.target.value)
-                }
-            />
-
-            <input
-                placeholder="Value"
-                value={putVal}
-                onChange={(e)=>
-                    setPutVal(e.target.value)
-                }
-            />
-
-            <button onClick={handlePut}>
-                PUT
-            </button>
-
-            <br />
-            <br />
-
-            <input
-                placeholder="Key"
-                value={getKeyState}
-                onChange={(e)=>
-                    setGetKeyState(e.target.value)
-                }
-            />
-
-            <button onClick={handleGet}>
-                GET
-            </button>
-
-            <p>{message}</p>
-
+          <button
+            onClick={handlePut}
+            className="
+            bg-cyan-500
+            text-black
+            font-bold
+            rounded-lg
+            p-2
+            "
+          >
+            PUT
+          </button>
         </div>
-    );
+      </div>
+
+      <div
+        className="
+        bg-slate-800
+        rounded-xl
+        p-6
+        shadow-lg
+        "
+      >
+        <h2 className="text-xl font-semibold mb-4">
+          GET Operation
+        </h2>
+
+        <div className="flex flex-col gap-3">
+          <input
+            placeholder="Key"
+            value={getKeyState}
+            onChange={(e) =>
+              setGetKeyState(e.target.value)
+            }
+            className="
+            bg-slate-700
+            rounded-lg
+            p-2
+            "
+          />
+
+          <button
+            onClick={handleGet}
+            className="
+            bg-cyan-500
+            text-black
+            font-bold
+            rounded-lg
+            p-2
+            "
+          >
+            GET
+          </button>
+
+          <p className="text-green-400">
+            {message}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default CacheForm;

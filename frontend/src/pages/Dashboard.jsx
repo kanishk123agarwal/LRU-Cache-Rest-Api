@@ -1,76 +1,74 @@
 import { useEffect, useState } from "react";
 
+import Navbar from "../components/Navbar";
 import CreateCache from "../components/CreateCache";
 import CacheForm from "../components/CacheForm";
 import StatsCards from "../components/StatsCards";
 import CacheVisualization from "../components/CacheVisualization";
+import BenchmarkCharts from "../components/BenchmarkCharts";
 
-import { getStats,getCacheState} from "../services/api";
+import {
+  getStats,
+  getCacheState,
+} from "../services/api";
 
-function Dashboard(){
+function Dashboard() {
+  const [stats, setStats] = useState(null);
 
-    const [stats,setStats] =
-        useState(null);
+  const [cache, setCache] = useState([]);
 
-    const [cache,setCache] =
-        useState([]);
+  const loadData = async () => {
+    try {
+      const statsResponse =
+        await getStats();
 
-    const loadData = async () => {
+      setStats(statsResponse.data);
 
-        try{
+      const cacheResponse =
+        await getCacheState();
 
-            const statsResponse =
-                await getStats();
+      setCache(
+        cacheResponse.data.cache
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-            setStats(
-                statsResponse.data
-            );
+  useEffect(() => {
+    loadData();
+  }, []);
 
-            const cacheResponse =
-                await getCacheState();
+  return (
+    <div>
+      <Navbar />
 
-            setCache(
-                cacheResponse.data.cache
-            );
-        }
-        catch(error){
+      <div
+        className="
+        max-w-6xl
+        mx-auto
+        p-6
+        space-y-6
+        "
+      >
+        <CreateCache
+          onCreated={loadData}
+        />
 
-            console.log(error);
-        }
-    };
+        <CacheForm
+          refresh={loadData}
+        />
 
-    useEffect(()=>{
+        <StatsCards stats={stats} />
 
-        loadData();
+        <CacheVisualization
+          cache={cache}
+        />
 
-    },[]);
-
-    return(
-
-        <div>
-
-            <h1>
-                LRU Cache Dashboard
-            </h1>
-
-            <CreateCache
-                onCreated={loadData}
-            />
-
-            <CacheForm
-                refresh={loadData}
-            />
-
-            <StatsCards
-                stats={stats}
-            />
-
-            <CacheVisualization
-                cache={cache}
-            />
-
-        </div>
-    );
+        <BenchmarkCharts />
+      </div>
+    </div>
+  );
 }
 
 export default Dashboard;

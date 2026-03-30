@@ -62,3 +62,12 @@ functional_test
 # Python
 __pycache__/
 *.pyc
+
+# Vite
+frontend/.vite/
+
+# Node modules
+frontend/node_modules/
+
+# Build output
+frontend/dist/
