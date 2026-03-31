@@ -1,14 +1,18 @@
 [
     {
         "operations": 1000,
-        "time": 3
+        "time_ms": 1
     },
     {
         "operations": 10000,
-        "time": 43
+        "time_ms": 8
     },
     {
         "operations": 100000,
-        "time": 250
+        "time_ms": 65
+    },
+    {
+        "operations": 1000000,
+        "time_ms": 700
     }
 ]

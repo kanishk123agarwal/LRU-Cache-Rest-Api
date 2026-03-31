@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 import json
+import os
 
 # ------------------------------------------------
 # Create FastAPI App
@@ -41,6 +42,10 @@ class CreateCacheRequest(BaseModel):
 class PutRequest(BaseModel):
     key: int
     value: int
+
+class BenchmarkRequest(BaseModel):
+    operations: int
+    workload: str
 
 # ------------------------------------------------
 # Helper Function
@@ -171,3 +176,48 @@ def cache_state():
     return {
         "cache": json.loads(response)
     }
+
+@app.get("/workload-results")
+def workload_results():
+
+    with open(
+        "reports/workload_results.json"
+    ) as file:
+
+        return json.load(file)
+    
+@app.get("/benchmark-results")
+def benchmark_results():
+
+    with open(
+        "reports/benchmark_results.json",
+        "r"
+    ) as file:
+
+        return json.load(file)
+    
+@app.post("/run-benchmark")
+def run_benchmark(data: BenchmarkRequest):
+
+    try:
+
+        subprocess.run(
+            [
+                "./tests/workload_benchmark",
+                str(data.operations),
+                data.workload
+            ],
+            check=True
+        )
+
+        return {
+            "message":
+            "Benchmark completed successfully"
+        }
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )

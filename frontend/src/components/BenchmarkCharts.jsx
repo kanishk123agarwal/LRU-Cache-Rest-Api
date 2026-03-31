@@ -6,15 +6,11 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
+  BarChart,
+  Bar,
 } from "recharts";
 
-function BenchmarkCharts() {
-  const data = [
-    { operations: 1000, time: 2 },
-    { operations: 10000, time: 15 },
-    { operations: 100000, time: 120 },
-  ];
-
+function BenchmarkCharts({ benchmarkData, workloadData }) {
   return (
     <div
       className="
@@ -22,31 +18,161 @@ function BenchmarkCharts() {
       p-6
       rounded-xl
       shadow-lg
+      space-y-10
       "
     >
-      <h2 className="text-xl mb-4">
-        Benchmark Results
-      </h2>
+      {/* Benchmark Chart */}
 
-      <ResponsiveContainer
-        width="100%"
-        height={350}
-      >
-        <LineChart data={data}>
-          <CartesianGrid />
+      <div>
+        <h2
+          className="
+          text-xl
+          font-semibold
+          mb-4
+          "
+        >
+          Operations vs Time
+        </h2>
 
-          <XAxis dataKey="operations" />
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={benchmarkData}>
+            <CartesianGrid />
 
-          <YAxis />
+            <XAxis
+              dataKey="operations"
+              label={{
+                value: "Operations",
+                position: "insideBottom",
+                offset: -5,
+              }}
+            />
 
-          <Tooltip />
+            <YAxis
+              label={{
+                value: "Time (ms)",
+                angle: -90,
+                position: "insideLeft",
+              }}
+            />
 
-          <Line
-            type="monotone"
-            dataKey="time"
-          />
-        </LineChart>
-      </ResponsiveContainer>
+            <Tooltip />
+
+            <Line type="monotone" dataKey="time_ms" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Workload Chart */}
+
+      <div>
+        <h2
+          className="
+        text-xl
+        font-semibold
+        mb-6
+        "
+        >
+          Workload Analysis
+        </h2>
+
+        {/* Latency */}
+
+        <div className="mb-10">
+          <h3 className="mb-3">Latency Comparison</h3>
+
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={workloadData}>
+              <CartesianGrid />
+
+              <XAxis
+                dataKey="workload"
+                label={{
+                  value: "Workload Type",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
+              />
+
+              <YAxis
+                label={{
+                  value: "Latency (ms)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+              />
+              <Tooltip />
+
+              <Bar dataKey="latency" fill="#06b6d4" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Hit Rate */}
+
+        <div className="mb-10">
+          <h3 className="mb-3">Hit Rate Comparison</h3>
+
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={workloadData}>
+              <CartesianGrid />
+
+              <XAxis
+                dataKey="workload"
+                label={{
+                  value: "Workload Type",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
+              />
+
+              <YAxis
+                label={{
+                  value: "Hit Rate (%)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+              />
+
+              <Tooltip />
+
+              <Bar dataKey="hit_rate" fill="#22c55e" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Throughput */}
+
+        <div>
+          <h3 className="mb-3">Throughput Comparison</h3>
+
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={workloadData}>
+              <CartesianGrid />
+
+              <XAxis
+                dataKey="workload"
+                label={{
+                  value: "Workload Type",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
+              />
+
+              <YAxis
+                label={{
+                  value: "Throughput (ops/sec)",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+              />
+
+              <Tooltip />
+
+              <Bar dataKey="throughput" fill="#f59e0b" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }

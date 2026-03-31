@@ -4,8 +4,15 @@
 #include <fstream>
 #include <chrono>
 #include <cstdlib>
-
+#include <iomanip>
 using namespace std;
+
+struct BenchmarkMetrics
+{
+    long long latency;
+    double hitRate;
+    double throughput;
+};
 
 // --------------------------------------------------
 // Read Heavy
@@ -13,23 +20,35 @@ using namespace std;
 // 10% PUT
 // --------------------------------------------------
 
-long long runReadHeavy()
+BenchmarkMetrics runReadHeavy(int operations)
 {
     LRUCache cache(10000);
 
-    // Preload cache
+    long long hits = 0;
+    long long misses = 0;
+
     for(int i=0;i<5000;i++)
     {
         cache.put(i,i);
     }
 
-    auto start = chrono::high_resolution_clock::now();
+    auto start =
+        chrono::high_resolution_clock::now();
 
-    for(int i=0;i<100000;i++)
+    for(int i=0;i<operations;i++)
     {
         if(rand()%10 < 9)
         {
-            cache.get(rand()%5000);
+            int key =
+                rand()%5000;
+
+            int value =
+                cache.get(key);
+
+            if(value==-1)
+                misses++;
+            else
+                hits++;
         }
         else
         {
@@ -37,11 +56,35 @@ long long runReadHeavy()
         }
     }
 
-    auto end = chrono::high_resolution_clock::now();
+    auto end =
+        chrono::high_resolution_clock::now();
 
-    return chrono::duration_cast<
-        chrono::milliseconds
-    >(end-start).count();
+    auto duration =
+        chrono::duration_cast<
+            chrono::milliseconds
+        >(end-start).count();
+
+    double hitRate = 0;
+
+    if(hits+misses>0)
+    {
+        hitRate =
+            (double)hits*100.0/
+            (hits+misses);
+    }
+
+    double throughput =
+        duration>0
+        ?
+        (double)operations*1000.0/duration
+        :
+        operations;
+
+    return {
+        duration,
+        hitRate,
+        throughput
+    };
 }
 
 // --------------------------------------------------
@@ -50,13 +93,17 @@ long long runReadHeavy()
 // 10% GET
 // --------------------------------------------------
 
-long long runWriteHeavy()
+BenchmarkMetrics runWriteHeavy(int operations)
 {
     LRUCache cache(10000);
 
-    auto start = chrono::high_resolution_clock::now();
+    long long hits = 0;
+    long long misses = 0;
 
-    for(int i=0;i<100000;i++)
+    auto start =
+        chrono::high_resolution_clock::now();
+
+    for(int i=0;i<operations;i++)
     {
         if(rand()%10 < 9)
         {
@@ -64,15 +111,45 @@ long long runWriteHeavy()
         }
         else
         {
-            cache.get(rand()%5000);
+            int value =
+                cache.get(rand()%5000);
+
+            if(value==-1)
+                misses++;
+            else
+                hits++;
         }
     }
 
-    auto end = chrono::high_resolution_clock::now();
+    auto end =
+        chrono::high_resolution_clock::now();
 
-    return chrono::duration_cast<
-        chrono::milliseconds
-    >(end-start).count();
+    auto duration =
+        chrono::duration_cast<
+            chrono::milliseconds
+        >(end-start).count();
+
+    double hitRate = 0;
+
+    if(hits+misses>0)
+    {
+        hitRate =
+            (double)hits*100.0/
+            (hits+misses);
+    }
+
+    double throughput =
+        duration>0
+        ?
+        (double)operations*1000.0/duration
+        :
+        operations;
+
+    return {
+        duration,
+        hitRate,
+        throughput
+    };
 }
 
 // --------------------------------------------------
@@ -81,13 +158,17 @@ long long runWriteHeavy()
 // 50% PUT
 // --------------------------------------------------
 
-long long runMixed()
+BenchmarkMetrics runMixed(int operations)
 {
     LRUCache cache(10000);
 
-    auto start = chrono::high_resolution_clock::now();
+    long long hits = 0;
+    long long misses = 0;
 
-    for(int i=0;i<100000;i++)
+    auto start =
+        chrono::high_resolution_clock::now();
+
+    for(int i=0;i<operations;i++)
     {
         if(rand()%2)
         {
@@ -95,45 +176,126 @@ long long runMixed()
         }
         else
         {
-            cache.get(rand()%5000);
+            int value =
+                cache.get(rand()%5000);
+
+            if(value==-1)
+                misses++;
+            else
+                hits++;
         }
     }
 
-    auto end = chrono::high_resolution_clock::now();
+    auto end =
+        chrono::high_resolution_clock::now();
 
-    return chrono::duration_cast<
-        chrono::milliseconds
-    >(end-start).count();
+    auto duration =
+        chrono::duration_cast<
+            chrono::milliseconds
+        >(end-start).count();
+
+    double hitRate = 0;
+
+    if(hits+misses>0)
+    {
+        hitRate =
+            (double)hits*100.0/
+            (hits+misses);
+    }
+
+    double throughput =
+        duration>0
+        ?
+        (double)operations*1000.0/duration
+        :
+        operations;
+
+    return {
+        duration,
+        hitRate,
+        throughput
+    };
 }
 
 // --------------------------------------------------
 // Main
 // --------------------------------------------------
 
-int main()
+int main(
+    int argc,
+    char* argv[]
+)
 {
+    if(argc < 3)
+    {
+        cout
+        << "Usage: "
+        << "./workload_benchmark "
+        << "<operations> "
+        << "<workload>\n";
+
+        return 1;
+    }
+
     srand(time(nullptr));
 
-    ofstream file("workload_results.csv");
+    int operations =
+        stoi(argv[1]);
 
-    file << "workload,time_ms\n";
+    string workload =
+        argv[2];
 
-    long long readHeavyTime = runReadHeavy();
-    long long writeHeavyTime = runWriteHeavy();
-    long long mixedTime = runMixed();
+    BenchmarkMetrics result;
 
-    file << "read-heavy," << readHeavyTime << "\n";
-    file << "write-heavy," << writeHeavyTime << "\n";
-    file << "mixed," << mixedTime << "\n";
+    if(workload == "read-heavy")
+    {
+        result =
+    runReadHeavy(operations);
+    }
+    else if(workload == "write-heavy")
+    {
+        result =
+    runReadHeavy(operations);
+    }
+    else
+    {
+        result =
+    runReadHeavy(operations);
+    }
+
+    ofstream file(
+        "reports/workload_results.json"
+    );
+
+    if(!file.is_open())
+    {
+        cerr
+        << "Failed to open workload_results.json\n";
+
+        return 1;
+    }
+
+    file
+    << "[{"
+    << "\"workload\":\""
+    << workload
+    << "\","
+    << "\"latency\":"
+<< result.latency
+<< ","
+<< "\"hit_rate\":"
+<< fixed
+<< setprecision(2)
+<< result.hitRate
+<< ","
+<< "\"throughput\":"
+<< result.throughput
+    << "}]";
 
     file.close();
 
-    cout << "========== Results ==========\n";
-    cout << "Read Heavy  : " << readHeavyTime << " ms\n";
-    cout << "Write Heavy : " << writeHeavyTime << " ms\n";
-    cout << "Mixed       : " << mixedTime << " ms\n";
-
-    cout << "\nCSV Generated Successfully\n";
+    cout
+    << "Benchmark completed successfully\n";
 
     return 0;
 }

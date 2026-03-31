@@ -18,3 +18,21 @@ export const getStats = () =>
 
 export const getCacheState = () =>
     API.get("/cache-state");
+
+export const getBenchmarkResults = () =>
+    API.get("/benchmark-results");
+
+export const getWorkloadResults = () =>
+    API.get("/workload-results");
+
+export const runBenchmark = (
+    operations,
+    workload
+) =>
+    API.post(
+        "/run-benchmark",
+        {
+            operations,
+            workload
+        }
+    );
